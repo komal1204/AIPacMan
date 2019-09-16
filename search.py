@@ -205,7 +205,35 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    import datetime
+    startTime = datetime.datetime.now()
+
+    fringe_list = util.PriorityQueue()
+    visited = []
+
+    startState = problem.getStartState()
+    fringe_list.push((startState, []), 0)
+
+    while not fringe_list.isEmpty():
+        front, directions = fringe_list.pop()
+
+        if problem.isGoalState(front):
+            break
+
+        if front not in visited:
+            successors = problem.getSuccessors(front)
+            for s in successors:
+                if s[0] not in visited:
+                    actions = directions + [s[1]]
+                    fringe_list.push((s[0],actions),problem.getCostOfActions(actions))
+                    visited.append(front)
+
+
+    endTime = datetime.datetime.now()
+    timeTaken = endTime - startTime
+
+    print "\nTime taken for depth search sort: ", timeTaken.microseconds / 1000, " milliseconds"
+    return directions
 
 def nullHeuristic(state, problem=None):
     """
