@@ -233,6 +233,7 @@ def uniformCostSearch(problem):
     timeTaken = endTime - startTime
 
     print "\nTime taken for depth search sort: ", timeTaken.microseconds / 1000, " milliseconds"
+
     return directions
 
 def nullHeuristic(state, problem=None):
@@ -245,8 +246,38 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    import datetime
+    import searchAgents
+    startTime = datetime.datetime.now()
 
+    fringe_list = util.PriorityQueue()
+    visited = []
+
+    startState = problem.getStartState()
+    fringe_list.push((startState, []), heuristic(startState, problem))
+
+    while not fringe_list.isEmpty():
+        top, directions = fringe_list.pop()
+
+        # Goal state reached
+        if problem.isGoalState(top):
+            break
+
+        if top not in visited:
+            successors = problem.getSuccessors(top)
+
+            for successor in successors:
+                if successor[0] not in visited:
+                    actions = directions + [successor[1]]
+                    fringe_list.push((successor[0],actions), problem.getCostOfActions(actions) + heuristic(successor[0], problem))
+                    visited.append(top)
+
+    endTime = datetime.datetime.now()
+    timeTaken = endTime - startTime
+
+    print "\nTime taken for depth search sort: ", timeTaken.microseconds / 1000, " milliseconds"
+
+    return directions
 
 # Abbreviations
 bfs = breadthFirstSearch
