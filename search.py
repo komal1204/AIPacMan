@@ -86,12 +86,62 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    print "Start:", problem.getStartState()
-    print "Grid" , problem.walls
-    print "grid [0][0]" , problem.walls[0][0]
-
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    import datetime
+    startTime = datetime.datetime.now()
+
+    fringe_list = util.Stack()
+    path_explored = {}
+    visited = {}
+
+    startState = problem.getStartState()
+    goalState = ()
+    path_explored[startState] = [(startState, " ")]
+    fringe_list.push(startState)
+
+    while not fringe_list.isEmpty():
+        top = fringe_list.pop()
+
+        # Goal state reached
+        if problem.isGoalState(top):
+            goalState = top
+            break
+
+        successors = problem.getSuccessors(top)
+        if top not in visited:
+            visited[top] = True
+
+        for successor in successors:
+            if successor[0] not in visited:
+                fringe_list.push(successor[0])
+                path_explored[successor[0]] = [(top, successor[1])]
+
+    path_directions = []
+    x = path_explored[goalState]
+
+    while (x[0][0] is not startState):
+        path_directions.insert(0, x[0][1])
+        x = path_explored[x[0][0]]
+
+    path_directions.insert(0, x[0][1])
+
+    from game import Directions
+    s = Directions.SOUTH
+    w = Directions.WEST
+    e = Directions.EAST
+    n = Directions.NORTH
+
+    path_directions = list(map(lambda b: b.replace("West", w), path_directions))
+    path_directions = list(map(lambda b: b.replace("East", e), path_directions))
+    path_directions = list(map(lambda b: b.replace("North", n), path_directions))
+    path_directions = list(map(lambda b: b.replace("South", s), path_directions))
+
+    endTime = datetime.datetime.now()
+    timeTaken = endTime - startTime
+
+    print "\nTime taken for depth search sort: ", timeTaken.microseconds / 1000, " milliseconds"
+
+    return path_directions
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
