@@ -288,6 +288,8 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.width = right
+        self.height = top
 
     def getStartState(self):
         """
@@ -295,14 +297,16 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        cornersNotTraversed = (True, True, True, True)
+        return (self.startingPosition,cornersNotTraversed)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        cornersNotTraversed = state[1]
+        return (not cornersNotTraversed[0] and not cornersNotTraversed[1] and not cornersNotTraversed[2] and not cornersNotTraversed[3])
 
     def getSuccessors(self, state):
         """
@@ -324,7 +328,25 @@ class CornersProblem(search.SearchProblem):
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
 
-            "*** YOUR CODE HERE ***"
+            # self.corners is ((1,1), (1,top), (right, 1), (right, top))
+
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                if nextState not in self.corners:
+                    successors.append(((nextState,state[1]), action, 1))
+                else:
+                    if nextState == (1,1):
+                        cornersLeft = (state[1][0], state[1][1], state[1][2], False)
+                    elif nextState == (1,self.height):
+                        cornersLeft = (state[1][0], state[1][1], False, state[1][3])
+                    elif nextState == (self.width,1):
+                        cornersLeft = (False, state[1][1], state[1][2], state[1][3])
+                    elif nextState == (self.width,self.height):
+                        cornersLeft = (state[1][0], False, state[1][2], state[1][3])
+                    successors.append(((nextState,cornersLeft),action,1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
