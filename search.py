@@ -149,58 +149,32 @@ def breadthFirstSearch(problem):
     import datetime
     startTime = datetime.datetime.now()
 
-    path_directions = []
-
     startState = problem.getStartState()
     fringe_list = util.Queue()
-    path_explored = {}
-    visited = {}
-    goalState = (-1,-1)
+    visited = []
 
-    path_explored[startState] = [(startState, " ")]
-    fringe_list.push(startState)
-    visited[startState] = True
+    fringe_list.push((startState,[]))
+    visited.append(startState)
 
     while not fringe_list.isEmpty():
-        front = fringe_list.pop()
+        front,directions = fringe_list.pop()
 
         if problem.isGoalState(front):
-            goalState = front
             break
 
         successors = problem.getSuccessors(front)
 
         for s in successors:
             if s[0] not in visited:
-                fringe_list.push(s[0])
-                visited[s[0]] = True
-                path_explored[s[0]] = [(front, s[1])]
-
-    x = path_explored[goalState]
-
-    while (x[0][0] is not startState):
-        path_directions.insert(0, x[0][1])
-        x = path_explored[x[0][0]]
-
-    path_directions.insert(0, x[0][1])
-
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    e = Directions.EAST
-    n = Directions.NORTH
-
-    path_directions = list(map(lambda b: b.replace("West", w), path_directions))
-    path_directions = list(map(lambda b: b.replace("East", e), path_directions))
-    path_directions = list(map(lambda b: b.replace("North", n), path_directions))
-    path_directions = list(map(lambda b: b.replace("South", s), path_directions))
+                fringe_list.push((s[0],directions + [s[1]]))
+                visited.append(s[0])
 
     endTime = datetime.datetime.now()
     timeTaken = endTime - startTime
 
     print "\nTime taken for depth search sort: ", timeTaken.microseconds / 1000, " milliseconds"
 
-    return path_directions
+    return directions
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
