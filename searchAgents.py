@@ -512,7 +512,31 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodlist = foodGrid.asList()
+    if not foodlist:
+        return 0
+
+    if len(foodlist) == 1:
+        return abs(position[0] - foodlist[0][0]) + abs(position[1] - foodlist[0][1])
+
+    eachCoordinateCost = []
+    for coordinates in foodlist:
+        eachCoordinateCost.append(abs(position[0]-coordinates[0])+abs(position[1]-coordinates[1]))
+
+    minDist = min(eachCoordinateCost)
+    nearestCoordinate = foodlist[eachCoordinateCost.index(minDist)]
+    foodlist.remove(nearestCoordinate)
+
+    eachCoordinateCost = []
+    for coordinates in foodlist:
+        eachCoordinateCost.append(abs(coordinates[0] - nearestCoordinate[0]) + abs(coordinates[1] - nearestCoordinate[1]))
+
+    maxDist = max(eachCoordinateCost)
+    farthestCoordinate = foodlist[eachCoordinateCost.index(maxDist)]
+
+    return abs(farthestCoordinate[0]-nearestCoordinate[0]) + abs(farthestCoordinate[1]-nearestCoordinate[1]) + \
+           abs(position[0]-nearestCoordinate[0]) + abs(position[1]-nearestCoordinate[1])
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
