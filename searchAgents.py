@@ -288,8 +288,6 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.width = right
-        self.height = top
 
     def getStartState(self):
         """
@@ -297,6 +295,8 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        # Storing the tuple of booleans representing the corners which are yet to be visited; which are all at start.
+        # Hence, each game state consists of the starting position and the corners remaining to visit.
         cornersNotTraversed = (True, True, True, True)
         return (self.startingPosition,cornersNotTraversed)
 
@@ -306,6 +306,7 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
         cornersNotTraversed = state[1]
+        # check if all corners are visited
         return (not cornersNotTraversed[0] and not cornersNotTraversed[1] and not cornersNotTraversed[2] and not cornersNotTraversed[3])
 
     def getSuccessors(self, state):
@@ -320,6 +321,8 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
+        height, width = self.walls.height-2, self.walls.width-2
+
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -335,16 +338,17 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
+                # check if the successor is one of the corners. If yes, update the boolean tuple and store in its state.
                 if nextState not in self.corners:
                     successors.append(((nextState,state[1]), action, 1))
                 else:
                     if nextState == (1,1):
                         cornersLeft = (state[1][0], state[1][1], state[1][2], False)
-                    elif nextState == (1,self.height):
+                    elif nextState == (1,height):
                         cornersLeft = (state[1][0], state[1][1], False, state[1][3])
-                    elif nextState == (self.width,1):
+                    elif nextState == (width,1):
                         cornersLeft = (False, state[1][1], state[1][2], state[1][3])
-                    elif nextState == (self.width,self.height):
+                    elif nextState == (width,height):
                         cornersLeft = (state[1][0], False, state[1][2], state[1][3])
                     successors.append(((nextState,cornersLeft),action,1))
 
@@ -385,6 +389,7 @@ def cornersHeuristic(state, problem):
     startState = state[0]
     cornersLeft = state[1]
 
+    # List to store the coordinates of the corners yet to be visited.
     cornersList = []
 
     for i in corners:
@@ -406,13 +411,18 @@ def cornersHeuristic(state, problem):
     while len(cornersList) > 0:
         cornerDist = []
 
+        # Calculate the distance of startState from all the unvisited corners.
         for i in range(0, len(cornersList)):
             distance = util.manhattanDistance(startState, cornersList[i])
             cornerDist.append(distance)
 
+        # Append the distance of closest corner to heuristic
         closestCorner = min(cornerDist)
         heuristic += closestCorner
 
+        # Set the start state to closest corner. Upon next iterations, the min distance to the next closest corner
+        # will be added to the heuristic. Hence, at last, heuristic will return the total heuristic cost required to
+        # to reach the goal (where goal is covering all corners) from actual startState.
         closestCornerIndex = cornerDist.index(closestCorner)
         startState = cornersList[closestCornerIndex]
 
@@ -513,20 +523,26 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     foodlist = foodGrid.asList()
+
+    # If all food is eaten, return 0
     if not foodlist:
         return 0
 
+    # If only one food dot is remaining, returns the manhattan distance between the food and current position.
     if len(foodlist) == 1:
         return abs(position[0] - foodlist[0][0]) + abs(position[1] - foodlist[0][1])
 
+    # Calculate the cost to reach each of the food dots remaining to be eaten.
     eachCoordinateCost = []
     for coordinates in foodlist:
         eachCoordinateCost.append(abs(position[0]-coordinates[0])+abs(position[1]-coordinates[1]))
 
+    # Locate the nearest food and remove the same from foodList.
     minDist = min(eachCoordinateCost)
     nearestCoordinate = foodlist[eachCoordinateCost.index(minDist)]
     foodlist.remove(nearestCoordinate)
 
+    # Locate the next farthest food dot from the above selected nearest food dot.
     eachCoordinateCost = []
     for coordinates in foodlist:
         eachCoordinateCost.append(abs(coordinates[0] - nearestCoordinate[0]) + abs(coordinates[1] - nearestCoordinate[1]))
@@ -534,6 +550,8 @@ def foodHeuristic(state, problem):
     maxDist = max(eachCoordinateCost)
     farthestCoordinate = foodlist[eachCoordinateCost.index(maxDist)]
 
+    # Return the sum of manhattan distances of nearest food to the farthest food and from current position to nearest
+    # coordinate. This gives us an admissible and consistent heuristic for solving the food search problem.
     return abs(farthestCoordinate[0]-nearestCoordinate[0]) + abs(farthestCoordinate[1]-nearestCoordinate[1]) + \
            abs(position[0]-nearestCoordinate[0]) + abs(position[1]-nearestCoordinate[1])
 
